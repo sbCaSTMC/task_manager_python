@@ -3,18 +3,18 @@ from models.task import Task
 from utils.calculator import Calculator
 from database import db
 
-# Create a Blueprint for task routes
+# タスク関連のルート用のBlueprintを作成
 tasks_bp = Blueprint('tasks', __name__)
 
 @tasks_bp.route('/')
 def index():
-    """Display all tasks."""
+    """すべてのタスクを表示する。"""
     tasks = Task.get_all()
     return render_template('index.html', tasks=tasks)
 
 @tasks_bp.route('/add', methods=['POST'])
 def add_task():
-    """Add a new task."""
+    """新しいタスクを追加する。"""
     title = request.form.get('title', '').strip()
     
     if not title:
@@ -28,22 +28,22 @@ def add_task():
 
 @tasks_bp.route('/delete/<int:task_id>', methods=['POST'])
 def delete_task(task_id):
-    """Delete a task by ID."""
+    """IDでタスクを削除する。"""
     task = Task.get_by_id(task_id)
     task.delete()
-    flash('Task deleted successfully!', 'success')
+    flash('タスクを削除しました!', 'success')
     return redirect(url_for('tasks.index'))
 
-# API endpoints for future AJAX functionality
+# AJAX機能のためのAPIエンドポイント
 @tasks_bp.route('/api/tasks', methods=['GET'])
 def get_tasks():
-    """Get all tasks as JSON."""
+    """すべてのタスクをJSON形式で取得する。"""
     tasks = Task.get_all()
     return jsonify([task.to_dict() for task in tasks])
 
 @tasks_bp.route('/api/tasks/<int:task_id>/toggle', methods=['POST'])
 def toggle_task(task_id):
-    """Toggle task completion status."""
+    """タスクの完了状態を切り替える。"""
     task = Task.get_by_id(task_id)
     task.completed = not task.completed
     task.save()
@@ -52,15 +52,15 @@ def toggle_task(task_id):
 @tasks_bp.route('/api/calculate', methods=['POST'])
 def calculate():
     """
-    Calculate the result of a mathematical expression.
+    数式の計算結果を取得する。
     
-    Expected JSON payload:
+    期待されるJSONペイロード:
     {
         "expression": "2 + 2 * 3"
     }
     
-    Returns:
-        JSON response with the result or error message
+    戻り値:
+        結果またはエラーメッセージを含むJSONレスポンス
     """
     data = request.get_json()
     if not data or 'expression' not in data:
@@ -70,6 +70,6 @@ def calculate():
             'expression': ''
         }), 400
     
-    # Calculate the result using our Calculator utility
+    # Calculatorユーティリティを使用して結果を計算
     result = Calculator.calculate(data['expression'])
     return jsonify(result)
